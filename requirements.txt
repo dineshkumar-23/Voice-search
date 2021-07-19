@@ -1,5 +1,5 @@
 transformers==4.8.2
 librosa==0.8.1
-torch==1.8.1+cpu -f https://download.pytorch.org/whl/lts/1.8/torch_lts.html
 Flask==2.0.1
+torch==1.8.1+cpu -f https://download.pytorch.org/whl/lts/1.8/torch_lts.html
 sounddevice==0.4.1
