@@ -1,7 +1,6 @@
 from transformers import Wav2Vec2Tokenizer, Wav2Vec2ForCTC
-import librosa
 import torch
-import sounddevice as sd
+import torchaudio
 from flask import Flask, render_template, request, jsonify, redirect
 
 app = Flask(__name__)
@@ -10,12 +9,17 @@ tokenizer = Wav2Vec2Tokenizer.from_pretrained('facebook/wav2vec2-base-960h')
 model = Wav2Vec2ForCTC.from_pretrained('facebook/wav2vec2-base-960h')
 
 def transcribe(file):
-    audio, rate = librosa.load(file, sr=16000)
-    input_values = tokenizer(audio, padding='longest', return_tensors='pt').input_values
-    logits = model(input_values).logits
-    predicted_ids = torch.argmax(logits, dim=-1)
+    waveform, sample_rate = torchaudio.load(file)
+    transformed_sample = torchaudio.transforms.Resample(sample_rate, 16000)(waveform[0,:].view(1, -1))
+    transformed_sample = transformed_sample.squeeze()
+    raw_speech_input = tokenizer(transformed_sample, padding="longest", return_tensors="pt").input_values
+
+    with torch.no_grad():
+        logits = model(raw_speech_input).logits
+    predicted_ids = torch.argmax(logits, axis=-1)
     transcription = tokenizer.batch_decode(predicted_ids)
     return transcription[0]
+
 
 
 @app.route("/", methods=["GET", "POST"])
@@ -36,4 +40,4 @@ def index():
 
 
 if __name__ == "__main__":
-    app.run(debug=True)
+    app.run(port=8000,debug=True)
