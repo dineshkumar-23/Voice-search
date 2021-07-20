@@ -4,3 +4,4 @@ Flask==2.0.1
 --find-links "https://download.pytorch.org/whl/lts/1.8/torch_lts.html"
 torch==1.8.1+cpu 
 sounddevice==0.4.1
+SoundFile==0.10.3.post1
